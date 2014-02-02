@@ -1,0 +1,28 @@
+{
+  "name": "diymailin.js",
+  "version": "0.1.0",
+  "description": "standalone incoming-email-to-http-post server",
+  "repository": "none",
+  "readme": "See README.md",
+  "readmeFilename": "README.md",
+  "main": "server.js",
+  "dependencies": {
+    "request": "~2.33.0",
+    "node-static": "~0.7.3",
+    "simplesmtp": "~0.3.20",
+    "stream-buffers": "~0.2.5"
+  },
+  "devDependencies": {
+    "jasmine-node": "~1.11.0"
+  },
+  "scripts": {
+    "test": "which guard && guard || jasmine-node spec/",
+    "start": "node server.js"
+  },
+  "author": "Chew Choon Keat <choonkeat@gmail.com>",
+  "license": "None",
+  "engines": {
+    "node": "0.10.x",
+    "npm":  "1.3.x"
+  }
+}
