@@ -33,13 +33,9 @@ fs.readFile(config, function(err, data) {
     });
   });
 
-  http.start(process.env.PORT, function(password, email, url, next) {
-    if (password == process.env.PASSWORD) {
-      whiteList[email] = url;
-      console.log("Writing", config, whiteList);
-      fs.writeFile(config, JSON.stringify(whiteList, null, 2), next);
-    } else {
-      next();
-    }
+  http.start(process.env.PORT, function(email, url, next) {
+    whiteList[email] = url;
+    console.log("Writing", config, whiteList);
+    fs.writeFile(config, JSON.stringify(whiteList, null, 2), next);
   });
 });
