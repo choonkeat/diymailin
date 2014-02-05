@@ -11,9 +11,11 @@ fs.readFile(config, function(err, data) {
 
   var url_for = function(req) {
     var url = null;
+    var bare_addresses = [];
+    for (var i in req.to) { bare_addresses.push(req.to[i].replace(/\+.+@/, '@')); } // array of emails with +label stripped out
     for (var email in whiteList) {
       url = whiteList[email];
-      if (url && req.to.indexOf(email) != -1) return url;
+      if (url && bare_addresses.indexOf(email) != -1) return url;
     }
   }
 
@@ -34,7 +36,7 @@ fs.readFile(config, function(err, data) {
   });
 
   http.start(process.env.PORT, function(email, url, next) {
-    whiteList[email] = url;
+    whiteList[email.replace(/\+.+@/, '@')] = url;
     console.log("Writing", config, whiteList);
     fs.writeFile(config, JSON.stringify(whiteList, null, 2), next);
   });
