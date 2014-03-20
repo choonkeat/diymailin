@@ -35,7 +35,12 @@ fs.readFile(config, function(err, data) {
   });
 
   http.start(process.env.PORT, function(email, url, next) {
-    whiteList[email.replace(/\+.+@/, '@').toLowerCase()] = url;
+    var key = email.replace(/\+.+@/, '@').toLowerCase();
+    if (url) {
+      whiteList[key] = url;
+    } else {
+      delete whiteList[key];
+    }
     console.log("Writing", config, whiteList);
     fs.writeFile(config, JSON.stringify(whiteList, null, 2), next);
   });
