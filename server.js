@@ -22,8 +22,7 @@ fs.readFile(config, function(err, data) {
   smtp.start(process.env.SMTP_PORT, url_for, function(req, buffer) {
     var url = url_for(req);
     console.log('POST', url);
-    var r = request.post(url);
-    r.form().append('message', buffer.getContents());
+    var r = request.post(url, { form: { message: buffer.getContentsAsString("utf8") } });
     r.on('error', function(err) {
       req.reject(err);
       console.log("FAIL", url, err);
