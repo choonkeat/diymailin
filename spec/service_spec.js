@@ -60,6 +60,19 @@ describe('service', function() {
       })
       waitsFor(function() { return rejected_with_error_message; }, 'smtp request should be rejected with explicit error', 1);
     });
+    it('should reject smtp request when webhook http code is not 2XX', function() {
+      var rejected_with_http_code = false;
+      var ev = new events.EventEmitter();
+      var buffer = new streamBuffers.WritableStreamBuffer();
+      spyOn(service.request, 'post').andCallFake(function() { console.log('calling', arguments); return ev; });
+      spyOn(smtp_request, 'reject').andCallFake(function(txt) { rejected_with_http_code = (txt == 'Multiple Choices'); });
+      runs(function() {
+        service.onSMTP(smtp_request, buffer);
+        ev.response = { statusCode: 300 };
+        ev.emit('end');
+      })
+      waitsFor(function() { return rejected_with_http_code; }, 'smtp request should be rejected with http status', 1);
+    });
     // un-matched email would not trigger onSMTP
   });
 

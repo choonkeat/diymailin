@@ -26,7 +26,8 @@ module.exports = {
     });
     r.on('end', function(err) {
       statusCode = (this.response && this.response.statusCode);
-      if (!err) return req.accept();
+      if (!err && statusCode >= 200 && statusCode <= 299) return req.accept();
+      if (!err) err = http.STATUS_CODES[statusCode];
       req.reject(err);
       console.log("FAIL", url, err);
     });
