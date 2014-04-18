@@ -1,47 +1,13 @@
 var fs = require('fs'),
-    path = require('path'),
-    request = require('request'),
+    http = require('http'),
+    service = require('./service'),
     smtp = require('./smtp'),
     http = require('./http');
 
-var config = process.env.CONFIG || process.env.TMPDIR + path.sep + 'config.json';
-fs.readFile(config, function(err, data) {
-  var whiteList = (data ? JSON.parse(data) : {});
-  console.log("Loaded", config, whiteList);
+fs.readFile(service.config_file, function(err, data) {
+  service.email_url_map = (data ? JSON.parse(data) : {});
+  console.log("Loaded", service.config_file, service.email_url_map);
 
-  var url_for = function(req) {
-    var url = null;
-    var bare_addresses = [];
-    for (var i in req.to) { bare_addresses.push(req.to[i].replace(/\+.+@/, '@').toLowerCase()); } // array of emails with +label stripped out
-    for (var email in whiteList) {
-      url = whiteList[email];
-      if (url && bare_addresses.indexOf(email) != -1) return url;
-    }
-  }
-
-  smtp.start(process.env.SMTP_PORT, url_for, function(req, buffer) {
-    var url = url_for(req);
-    console.log('POST', url);
-    var r = request.post(url, { form: { message: buffer.getContentsAsString("utf8") } });
-    r.on('error', function(err) {
-      req.reject(err);
-      console.log("FAIL", url, err);
-    });
-    r.on('end', function(err) {
-      if (! err) return req.accept();
-      req.reject(err);
-      console.log("FAIL", url, err);
-    });
-  });
-
-  http.start(process.env.PORT, function(email, url, next) {
-    var key = email.replace(/\+.+@/, '@').toLowerCase();
-    if (url) {
-      whiteList[key] = url;
-    } else {
-      delete whiteList[key];
-    }
-    console.log("Writing", config, whiteList);
-    fs.writeFile(config, JSON.stringify(whiteList, null, 2), next);
-  });
+  smtp.start(process.env.SMTP_PORT, service.req2url.bind(service), service.onSMTP.bind(service));
+  http.start(process.env.PORT, service.onHTTP.bind(service));
 });
