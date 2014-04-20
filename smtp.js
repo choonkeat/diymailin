@@ -20,6 +20,7 @@ module.exports = {
             initialSize: (100 * 1024),   // start as 100 kilobytes.
             incrementAmount: (10 * 1024) // grow by 10 kilobytes each time buffer overflows.
         });
+        if (process.env.SMTP_VERBOSE) request.pipe(process.stderr);
         request.pipe(buffer);
         request.on("end", function() {
           callback(request, buffer);
